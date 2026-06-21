@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Licorería Minimarket Diva</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --border: #2e2e3e;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --red: #e05252;
+    --green: #52c97a;
+    --blue: #5282e0;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  /* ─── LOGIN ─────────────────────────────────────── */
+  #login-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 60% 40%, #1a1210 0%, #0f0f13 70%);
+  }
+  .login-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 48px 40px; width: 360px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  }
+  .login-logo { text-align: center; margin-bottom: 32px; }
+  .login-logo .bottle { font-size: 48px; }
+  .login-logo h1 { font-size: 20px; color: var(--gold); font-weight: 700; margin-top: 8px; letter-spacing: .5px; }
+  .login-logo p { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: .5px; text-transform: uppercase; }
+  .field input, .field select {
+    width: 100%; padding: 10px 14px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text); font-size: 14px; outline: none; transition: border .2s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--gold); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 18px; border-radius: var(--radius); border: none;
+    cursor: pointer; font-size: 14px; font-weight: 600; transition: all .15s;
+  }
+  .btn-gold { background: var(--gold); color: #0f0f13; width: 100%; margin-top: 8px; padding: 13px; }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-sm { padding: 7px 14px; font-size: 13px; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { filter: brightness(1.15); }
+  .btn-success { background: var(--green); color: #0f0f13; }
+  .btn-success:hover { filter: brightness(1.1); }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover { filter: brightness(1.1); }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+  #login-error { color: var(--red); font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; }
+
+  /* ─── APP SHELL ──────────────────────────────────── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 60px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .header-logo { font-size: 20px; }
+  .header-title { font-size: 15px; font-weight: 700; color: var(--gold); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .badge-rol {
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 4px 12px; border-radius: 20px; font-size: 12px; color: var(--muted);
+  }
+  .badge-rol span { color: var(--gold); font-weight: 600; }
+  .main-layout { display: flex; flex: 1; }
+
+  /* ─── SIDEBAR ────────────────────────────────────── */
+  nav {
+    width: 220px; background: var(--surface); border-right: 1px solid var(--border);
+    padding: 20px 12px; display: flex; flex-direction: column; gap: 4px;
+    min-height: calc(100vh - 60px);
+  }
+  .nav-section { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; padding: 12px 8px 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; color: var(--muted); transition: all .15s; border: none;
+    background: none; text-align: left; width: 100%;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(201,168,76,.12); color: var(--gold); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+  /* ─── CONTENT ────────────────────────────────────── */
+  main { flex: 1; padding: 28px; overflow-y: auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+  /* ─── CARDS ──────────────────────────────────────── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+  }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 16px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--text); }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+
+  /* ─── TABLE ──────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-ok { background: rgba(82,201,122,.15); color: var(--green); }
+  .badge-faltante { background: rgba(224,82,82,.15); color: var(--red); }
+  .badge-sobrante { background: rgba(201,168,76,.15); color: var(--gold); }
+  .badge-venta { background: rgba(82,130,224,.15); color: var(--blue); }
+
+  /* ─── FORM GRID ──────────────────────────────────── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+  /* ─── ALERT ──────────────────────────────────────── */
+  .alert {
+    padding: 12px 16px; border-radius: var(--radius); font-size: 13px;
+    margin-bottom: 16px; display: none;
+  }
+  .alert-success { background: rgba(82,201,122,.15); border: 1px solid rgba(82,201,122,.3); color: var(--green); }
+  .alert-error { background: rgba(224,82,82,.15); border: 1px solid rgba(224,82,82,.3); color: var(--red); }
+  .alert-info { background: rgba(82,130,224,.15); border: 1px solid rgba(82,130,224,.3); color: var(--blue); }
+
+  /* ─── CIERRE RESUMEN ─────────────────────────────── */
+  .resumen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .resumen-item { background: var(--surface2); border-radius: 8px; padding: 14px; }
+  .resumen-item .label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .resumen-item .valor { font-size: 18px; font-weight: 700; }
+  .stock-low { color: var(--red); }
+
+  /* ─── CUADRE ─────────────────────────────────────── */
+  .cuadre-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .cuadre-row:last-child { border-bottom: none; }
+  .cuadre-nombre { flex: 1; font-size: 13px; }
+  .cuadre-sistema { color: var(--muted); font-size: 12px; width: 100px; }
+  .cuadre-input { width: 90px; }
+  .cuadre-input input { width: 100%; padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="bottle">🍾</div>
+      <h1>Licorería Minimarket Diva</h1>
+      <p>Sistema de Inventario · UPN 2025</p>
+    </div>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="usr" placeholder="ej. admin" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="pwd" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-gold" onclick="login()">Ingresar al sistema</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="app">
+  <header>
+    <div class="header-left">
+      <span class="header-logo">🍾</span>
+      <span class="header-title">Licorería Minimarket Diva</span>
+    </div>
+    <div class="header-right">
+      <div class="badge-rol">Sesión: <span id="hdr-user">—</span> · <span id="hdr-rol">—</span></div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Salir</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <nav id="sidebar"></nav>
+
+    <main>
+      <!-- DASHBOARD -->
+      <div class="page active" id="pg-dashboard">
+        <div class="page-title">Panel principal</div>
+        <div class="page-sub">Resumen del sistema en tiempo real.</div>
+        <div class="stats-grid" id="dash-stats"></div>
+        <div class="card">
+          <div class="card-title">Últimos movimientos</div>
+          <div class="table-wrap">
+            <table id="dash-tabla">
+              <thead><tr><th>Fecha</th><th>Usuario</th><th>Tipo</th><th>Producto</th><th>Cant.</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVENTARIO -->
+      <div class="page" id="pg-inventario">
+        <div class="page-title">Inventario</div>
+        <div class="page-sub">Productos registrados con stock y precios.</div>
+        <div class="card">
+          <input type="text" id="inv-filter" placeholder="🔍  Buscar producto o proveedor..." style="width:100%;padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;margin-bottom:14px;" oninput="filtrarInventario()">
+          <div class="table-wrap">
+            <table id="inv-tabla">
+              <thead><tr><th>Cód. Barras</th><th>Producto</th><th>Proveedor</th><th>P. Compra</th><th>P. Venta</th><th>Stock</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTRAR PRODUCTO -->
+      <div class="page" id="pg-nuevo-producto">
+        <div class="page-title">Registrar producto</div>
+        <div class="page-sub">Agrega un nuevo producto al inventario.</div>
+        <div class="card">
+          <div id="np-alert" class="alert"></div>
+          <div class="form-grid">
+            <div class="field full"><label>Nombre del producto</label><input id="np-nombre" type="text" placeholder="Ej: Pisco Queirolo 750ml"></div>
+            <div class="field"><label>Código de barras</label><input id="np-codigo" type="text" placeholder="Ej: 7758218000024"></div>
+            <div class="field"><label>Proveedor</label><input id="np-proveedor" type="text" placeholder="Ej: BACKUS"></div>
+            <div class="field"><label>Precio de compra (S/.)</label><input id="np-pcompra" type="number" step="0.01" placeholder="0.00"></div>
+            <div class="field"><label>Precio de venta (S/.)</label><input id="np-pventa" type="number" step="0.01" placeholder="0.00"></div>
+            <div class="field"><label>Stock inicial</label><input id="np-stock" type="number" placeholder="0"></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-success" onclick="registrarProducto()">✓ Registrar producto</button>
+            <button class="btn btn-ghost" onclick="limpiarFormProd()">Limpiar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODIFICAR STOCK -->
+      <div class="page" id="pg-mod-stock">
+        <div class="page-title">Modificar stock</div>
+        <div class="page-sub">Actualiza la cantidad de un producto.</div>
+        <div class="card">
+          <div id="ms-alert" class="alert"></div>
+          <div class="form-grid">
+            <div class="field full"><label>Producto</label>
+              <select id="ms-prod"><option value="">— seleccionar —</option></select>
+            </div>
+            <div class="field"><label>Nueva cantidad</label><input id="ms-qty" type="number" placeholder="0"></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="modificarStock()">Actualizar stock</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTRAR VENTA -->
+      <div class="page" id="pg-venta">
+        <div class="page-title">Registrar venta</div>
+        <div class="page-sub">Descuenta el stock automáticamente.</div>
+        <div class="card">
+          <div id="venta-alert" class="alert"></div>
+          <div class="form-grid">
+            <div class="field full"><label>Producto</label>
+              <select id="v-prod"><option value="">— seleccionar —</option></select>
+            </div>
+            <div class="field"><label>Cantidad</label><input id="v-qty" type="number" min="1" value="1"></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-success" onclick="registrarVenta()">💰 Registrar venta</button>
+          </div>
+          <div id="venta-resumen" style="display:none;margin-top:20px;">
+            <div class="card-title">Resumen de venta</div>
+            <div class="resumen-grid" id="venta-resumen-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABRIR TURNO -->
+      <div class="page" id="pg-abrir-turno">
+        <div class="page-title">Apertura de turno</div>
+        <div class="page-sub">Registra el monto inicial en caja.</div>
+        <div class="card">
+          <div id="at-alert" class="alert"></div>
+          <div class="field" style="max-width:280px;">
+            <label>Monto inicial en caja (S/.)</label>
+            <input id="at-monto" type="number" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-success" onclick="abrirTurno()">🔓 Abrir turno</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CERRAR TURNO -->
+      <div class="page" id="pg-cerrar-turno">
+        <div class="page-title">Cierre de turno</div>
+        <div class="page-sub">Compara las ventas del sistema con el efectivo físico.</div>
+        <div class="card">
+          <div id="ct-alert" class="alert"></div>
+          <div class="field" style="max-width:280px;">
+            <label>Monto FÍSICO en caja (S/.)</label>
+            <input id="ct-monto" type="number" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-danger" onclick="cerrarTurno()">🔒 Cerrar turno</button>
+          </div>
+          <div id="cierre-resumen" style="display:none;margin-top:20px;">
+            <div class="card-title">Resumen del cierre</div>
+            <div class="resumen-grid" id="cierre-resumen-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUADRE DE PRODUCTOS -->
+      <div class="page" id="pg-cuadre">
+        <div class="page-title">Cuadre de productos</div>
+        <div class="page-sub">Compara el stock del sistema con el conteo físico.</div>
+        <div class="card">
+          <div id="cuadre-alert" class="alert"></div>
+          <input type="text" id="cuadre-filter" placeholder="🔍  Filtrar productos a contar..." style="width:100%;padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;margin-bottom:14px;" oninput="filtrarCuadre()">
+          <div id="cuadre-lista" style="max-height:480px;overflow-y:auto;"></div>
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" onclick="procesarCuadre()">📊 Procesar cuadre</button>
+          </div>
+          <div id="cuadre-resultado" style="display:none;margin-top:20px;"></div>
+        </div>
+      </div>
+
+      <!-- REPORTE DESCUADRES -->
+      <div class="page" id="pg-descuadres">
+        <div class="page-title">Reporte de descuadres</div>
+        <div class="page-sub">Historial de diferencias detectadas.</div>
+        <div class="card">
+          <div class="card-title">Descuadres de caja</div>
+          <div class="table-wrap">
+            <table id="desc-caja-tabla">
+              <thead><tr><th>Fecha</th><th>Cajero</th><th>Sistema</th><th>Declarado</th><th>Diferencia</th><th>Estado</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Descuadres de productos</div>
+          <div class="table-wrap">
+            <table id="desc-prod-tabla">
+              <thead><tr><th>Fecha</th><th>Supervisor</th><th>Producto</th><th>Sistema</th><th>Físico</th><th>Estado</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div class="page" id="pg-historial">
+        <div class="page-title">Historial de movimientos</div>
+        <div class="page-sub">Todos los eventos registrados en el sistema.</div>
+        <div class="card">
+          <div class="table-wrap">
+            <table id="hist-tabla">
+              <thead><tr><th>Fecha</th><th>Usuario</th><th>Tipo</th><th>Producto</th><th>Cant.</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- GESTIÓN USUARIOS -->
+      <div class="page" id="pg-usuarios">
+        <div class="page-title">Gestión de usuarios</div>
+        <div class="page-sub">Crear, editar y cambiar roles.</div>
+        <div class="card">
+          <div class="card-title">Usuarios registrados</div>
+          <div class="table-wrap">
+            <table id="usr-tabla">
+              <thead><tr><th>Usuario</th><th>Rol</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Crear nuevo usuario</div>
+          <div id="cu-alert" class="alert"></div>
+          <div class="form-grid">
+            <div class="field"><label>Usuario</label><input id="cu-usr" type="text"></div>
+            <div class="field"><label>Contraseña</label><input id="cu-pwd" type="password"></div>
+            <div class="field"><label>Rol</label>
+              <select id="cu-rol">
+                <option>Administrador</option><option selected>Cajero</option><option>Supervisor</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-success" onclick="crearUsuario()">+ Crear usuario</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Editar usuario existente</div>
+          <div id="eu-alert" class="alert"></div>
+          <div class="form-grid">
+            <div class="field"><label>Usuario a editar</label><input id="eu-usr" type="text"></div>
+            <div class="field"><label>Nueva contraseña (dejar vacío = sin cambio)</label><input id="eu-pwd" type="password"></div>
+            <div class="field"><label>Nuevo rol</label>
+              <select id="eu-rol">
+                <option value="">— sin cambio —</option>
+                <option>Administrador</option><option>Cajero</option><option>Supervisor</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="editarUsuario()">✎ Actualizar usuario</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ─── ESTADO ──────────────────────────────────────────────────
+let ROL = "", USUARIO = "";
+let inventarioData = [];
+
+// ─── LOGIN / LOGOUT ───────────────────────────────────────────
+async function login() {
+  const usr = document.getElementById('usr').value.trim();
+  const pwd = document.getElementById('pwd').value.trim();
+  const res = await api('/api/login', { usuario: usr, contrasena: pwd });
+  if (res.ok) {
+    ROL = res.rol; USUARIO = res.usuario;
+    document.getElementById('hdr-user').textContent = USUARIO;
+    document.getElementById('hdr-rol').textContent = ROL;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    buildSidebar();
+    navTo('dashboard');
+  } else {
+    document.getElementById('login-error').textContent = res.msg || 'Error de acceso.';
+  }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+async function logout() {
+  await api('/api/logout', {});
+  location.reload();
+}
+
+// ─── MENÚS POR ROL ────────────────────────────────────────────
+const MENUS_ROL = {
+  Administrador: [
+    { id:'dashboard',       icon:'📊', label:'Dashboard' },
+    { id:'inventario',      icon:'📦', label:'Inventario' },
+    { id:'nuevo-producto',  icon:'➕', label:'Registrar producto' },
+    { id:'mod-stock',       icon:'✏️',  label:'Modificar stock' },
+    { id:'abrir-turno',     icon:'🔓', label:'Abrir turno' },
+    { id:'venta',           icon:'💰', label:'Registrar venta' },
+    { id:'cerrar-turno',    icon:'🔒', label:'Cerrar turno' },
+    { id:'cuadre',          icon:'⚖️',  label:'Cuadre de productos' },
+    { id:'descuadres',      icon:'⚠️',  label:'Reporte descuadres' },
+    { id:'historial',       icon:'📋', label:'Historial' },
+    { id:'usuarios',        icon:'👤', label:'Gestión usuarios' },
+  ],
+  Supervisor: [
+    { id:'dashboard',   icon:'📊', label:'Dashboard' },
+    { id:'inventario',  icon:'📦', label:'Inventario' },
+    { id:'cuadre',      icon:'⚖️',  label:'Cuadre de productos' },
+    { id:'descuadres',  icon:'⚠️',  label:'Reporte descuadres' },
+    { id:'historial',   icon:'📋', label:'Historial' },
+  ],
+  Cajero: [
+    { id:'dashboard',    icon:'📊', label:'Dashboard' },
+    { id:'abrir-turno',  icon:'🔓', label:'Abrir turno' },
+    { id:'venta',        icon:'💰', label:'Registrar venta' },
+    { id:'inventario',   icon:'📦', label:'Consultar stock' },
+    { id:'cerrar-turno', icon:'🔒', label:'Cerrar turno' },
+  ],
+};
+
+function buildSidebar() {
+  const nav = document.getElementById('sidebar');
+  nav.innerHTML = '<div class="nav-section">Módulos</div>';
+  (MENUS_ROL[ROL] || []).forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-item';
+    btn.id = 'nav-' + m.id;
+    btn.innerHTML = `<span class="nav-icon">${m.icon}</span>${m.label}`;
+    btn.onclick = () => navTo(m.id);
+    nav.appendChild(btn);
+  });
+}
+
+function navTo(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('pg-' + id);
+  if (pg) pg.classList.add('active');
+  const nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
+  // Carga de datos según página
+  if (id === 'dashboard') cargarDashboard();
+  else if (id === 'inventario') cargarInventario();
+  else if (id === 'mod-stock' || id === 'venta') cargarInventario().then(llenarSelects);
+  else if (id === 'cuadre') cargarCuadre();
+  else if (id === 'descuadres') cargarDescuadres();
+  else if (id === 'historial') cargarHistorial();
+  else if (id === 'usuarios') cargarUsuarios();
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────
+async function api(url, body) {
+  const opts = body !== null
+    ? { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }
+    : { method: 'GET' };
+  const r = await fetch(url, opts);
+  return r.json();
+}
+async function get(url) {
+  const r = await fetch(url);
+  return r.json();
+}
+function showAlert(id, tipo, msg) {
+  const el = document.getElementById(id);
+  el.className = `alert alert-${tipo}`;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+function tipoBadge(tipo) {
+  const mapa = { Venta:'venta', FALTANTE:'faltante', SOBRANTE:'sobrante', OK:'ok' };
+  const cls = mapa[tipo] || 'ok';
+  return `<span class="badge badge-${cls}">${tipo}</span>`;
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────
+async function cargarDashboard() {
+  const [inv, hist] = await Promise.all([get('/api/inventario'), get('/api/historial')]);
+  const stockBajo = inv.filter(p => parseInt(p.stock) < 5).length;
+  const ventas = hist.filter(m => m.tipo === 'Venta').length;
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Productos</div><div class="stat-value gold">${inv.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Stock bajo (&lt;5)</div><div class="stat-value red">${stockBajo}</div></div>
+    <div class="stat-card"><div class="stat-label">Ventas registradas</div><div class="stat-value green">${ventas}</div></div>
+    <div class="stat-card"><div class="stat-label">Movimientos totales</div><div class="stat-value">${hist.length}</div></div>
+  `;
+  const tbody = document.querySelector('#dash-tabla tbody');
+  tbody.innerHTML = hist.slice(0,10).map(m =>
+    `<tr><td>${m.fecha}</td><td>${m.usuario}</td><td>${tipoBadge(m.tipo)}</td><td>${m.producto}</td><td>${m.cantidad}</td></tr>`
+  ).join('') || '<tr><td colspan="5" style="color:var(--muted);text-align:center">Sin movimientos</td></tr>';
+}
+
+// ─── INVENTARIO ───────────────────────────────────────────────
+async function cargarInventario() {
+  inventarioData = await get('/api/inventario');
+  renderInventario(inventarioData);
+  return inventarioData;
+}
+function renderInventario(data) {
+  const tbody = document.querySelector('#inv-tabla tbody');
+  tbody.innerHTML = data.map(p => {
+    const low = parseFloat(p.stock) < 5;
+    return `<tr>
+      <td style="color:var(--muted);font-size:12px">${p.codigo_barras || '—'}</td>
+      <td><strong>${p.nombre}</strong></td>
+      <td>${p.proveedor || '—'}</td>
+      <td>S/. ${parseFloat(p.precio_compra||0).toFixed(2)}</td>
+      <td>S/. ${parseFloat(p.precio_venta||0).toFixed(2)}</td>
+      <td class="${low ? 'stock-low' : ''}">${p.stock} ${low ? '⚠️' : ''}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="color:var(--muted);text-align:center">Sin productos</td></tr>';
+}
+function filtrarInventario() {
+  const q = document.getElementById('inv-filter').value.toLowerCase();
+  renderInventario(inventarioData.filter(p =>
+    p.nombre.toLowerCase().includes(q) || (p.proveedor || '').toLowerCase().includes(q)
+  ));
+}
+function llenarSelects() {
+  ['ms-prod', 'v-prod'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— seleccionar —</option>' +
+      inventarioData.map(p => `<option value="${p.nombre}">${p.nombre} (stock: ${p.stock})</option>`).join('');
+  });
+}
+
+// ─── REGISTRAR PRODUCTO ───────────────────────────────────────
+async function registrarProducto() {
+  const res = await api('/api/registrar_producto', {
+    nombre: document.getElementById('np-nombre').value,
+    codigo_barras: document.getElementById('np-codigo').value,
+    proveedor: document.getElementById('np-proveedor').value,
+    stock: document.getElementById('np-stock').value,
+    precio_compra: document.getElementById('np-pcompra').value,
+    precio_venta: document.getElementById('np-pventa').value,
+  });
+  showAlert('np-alert', res.ok ? 'success' : 'error', res.msg);
+  if (res.ok) limpiarFormProd();
+}
+function limpiarFormProd() {
+  ['np-nombre','np-codigo','np-proveedor','np-stock','np-pcompra','np-pventa'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ─── MODIFICAR STOCK ──────────────────────────────────────────
+async function modificarStock() {
+  const nombre = document.getElementById('ms-prod').value;
+  const cantidad = document.getElementById('ms-qty').value;
+  if (!nombre) return showAlert('ms-alert', 'error', 'Seleccione un producto.');
+  const res = await api('/api/modificar_stock', { nombre, cantidad });
+  showAlert('ms-alert', res.ok ? 'success' : 'error', res.msg);
+  if (res.ok) cargarInventario().then(llenarSelects);
+}
+
+// ─── REGISTRAR VENTA ──────────────────────────────────────────
+async function registrarVenta() {
+  const nombre = document.getElementById('v-prod').value;
+  const cantidad = document.getElementById('v-qty').value;
+  if (!nombre) return showAlert('venta-alert', 'error', 'Seleccione un producto.');
+  const res = await api('/api/registrar_venta', { nombre, cantidad: parseInt(cantidad) });
+  if (res.ok) {
+    showAlert('venta-alert', 'success', `Venta registrada correctamente.`);
+    document.getElementById('venta-resumen').style.display = 'block';
+    document.getElementById('venta-resumen-grid').innerHTML = `
+      <div class="resumen-item"><div class="label">Producto</div><div class="valor">${res.producto}</div></div>
+      <div class="resumen-item"><div class="label">Cantidad vendida</div><div class="valor">${res.cantidad}</div></div>
+      <div class="resumen-item"><div class="label">Total venta</div><div class="valor gold">S/. ${res.total.toFixed(2)}</div></div>
+      <div class="resumen-item"><div class="label">Stock restante</div><div class="valor ${res.stock_restante < 5 ? 'red' : 'green'}">${res.stock_restante}</div></div>
+    `;
+    cargarInventario().then(llenarSelects);
+  } else {
+    showAlert('venta-alert', 'error', res.msg);
+    document.getElementById('venta-resumen').style.display = 'none';
+  }
+}
+
+// ─── TURNOS ───────────────────────────────────────────────────
+async function abrirTurno() {
+  const monto = document.getElementById('at-monto').value;
+  if (!monto) return showAlert('at-alert', 'error', 'Ingrese el monto inicial.');
+  const res = await api('/api/abrir_turno', { monto });
+  showAlert('at-alert', res.ok ? 'success' : 'error', res.msg);
+}
+async function cerrarTurno() {
+  const monto = document.getElementById('ct-monto').value;
+  if (!monto) return showAlert('ct-alert', 'error', 'Ingrese el monto físico.');
+  const res = await api('/api/cerrar_turno', { monto });
+  if (res.ok) {
+    document.getElementById('cierre-resumen').style.display = 'block';
+    const color = res.estado === 'OK' ? 'green' : res.estado === 'FALTANTE' ? 'red' : 'gold';
+    document.getElementById('cierre-resumen-grid').innerHTML = `
+      <div class="resumen-item"><div class="label">Cajero</div><div class="valor">${res.cajero}</div></div>
+      <div class="resumen-item"><div class="label">Fecha</div><div class="valor">${res.fecha}</div></div>
+      <div class="resumen-item"><div class="label">Ventas en sistema</div><div class="valor">S/. ${res.monto_sistema.toFixed(2)}</div></div>
+      <div class="resumen-item"><div class="label">Monto declarado</div><div class="valor">S/. ${res.monto_declarado.toFixed(2)}</div></div>
+      <div class="resumen-item"><div class="label">Diferencia</div><div class="valor ${color}">S/. ${Math.abs(res.diferencia).toFixed(2)}</div></div>
+      <div class="resumen-item"><div class="label">Estado</div><div class="valor ${color}">${res.estado}</div></div>
+    `;
+    showAlert('ct-alert', res.estado === 'OK' ? 'success' : 'error',
+      res.estado === 'OK' ? '✓ Todo cuadra correctamente.' :
+      `⚠ ${res.estado}: S/. ${Math.abs(res.diferencia).toFixed(2)}`);
+  }
+}
+
+// ─── CUADRE PRODUCTOS ─────────────────────────────────────────
+async function cargarCuadre() {
+  const inv = await get('/api/inventario');
+  inventarioData = inv;
+  renderCuadreLista(inv);
+  document.getElementById('cuadre-resultado').style.display = 'none';
+  document.getElementById('cuadre-filter').value = '';
+}
+function renderCuadreLista(lista) {
+  const el = document.getElementById('cuadre-lista');
+  el.innerHTML = lista.map(p => `
+    <div class="cuadre-row" data-nombre="${p.nombre.toLowerCase()}">
+      <span class="cuadre-nombre">${p.nombre}</span>
+      <span class="cuadre-sistema">Sistema: ${p.stock}</span>
+      <div class="cuadre-input">
+        <input type="number" id="cq-${p.nombre.replace(/"/g,'')}" placeholder="Físico">
+      </div>
+    </div>
+  `).join('') || '<p style="color:var(--muted)">Sin productos.</p>';
+}
+function filtrarCuadre() {
+  const q = document.getElementById('cuadre-filter').value.toLowerCase();
+  const filtrados = inventarioData.filter(p => p.nombre.toLowerCase().includes(q));
+  renderCuadreLista(filtrados);
+}
+async function procesarCuadre() {
+  const conteos = {};
+  inventarioData.forEach(p => {
+    const id = 'cq-' + p.nombre.replace(/"/g,'');
+    const el = document.getElementById(id);
+    if (el && el.value !== '') conteos[p.nombre] = parseFloat(el.value);
+  });
+  if (Object.keys(conteos).length === 0) return showAlert('cuadre-alert', 'error', 'Ingrese al menos un conteo.');
+  const res = await api('/api/cuadre_productos', { conteos });
+  if (res.ok) {
+    const result = document.getElementById('cuadre-resultado');
+    result.style.display = 'block';
+    if (res.descuadres.length === 0) {
+      result.innerHTML = '<div class="alert alert-success" style="display:block">✓ Todo cuadra correctamente.</div>';
+    } else {
+      result.innerHTML = '<div class="card-title">Descuadres encontrados</div>' +
+        res.descuadres.map(d => `
+          <div class="cuadre-row">
+            <span class="cuadre-nombre">${d.nombre}</span>
+            <span style="color:var(--muted);font-size:12px">Sistema: ${d.sistema} | Físico: ${d.fisico}</span>
+            <span class="badge badge-${d.estado.toLowerCase()}">${d.estado}: ${Math.abs(d.diferencia)}</span>
+          </div>
+        `).join('');
+    }
+  }
+}
+
+// ─── REPORTES ─────────────────────────────────────────────────
+async function cargarDescuadres() {
+  const res = await get('/api/reporte_descuadres');
+  document.querySelector('#desc-caja-tabla tbody').innerHTML =
+    res.caja.map(d => `<tr>
+      <td>${d.fecha}</td><td>${d.cajero}</td>
+      <td>S/. ${d.sistema}</td><td>S/. ${d.declarado}</td>
+      <td>S/. ${Math.abs(parseFloat(d.diferencia)).toFixed(2)}</td>
+      <td>${tipoBadge(d.estado)}</td>
+    </tr>`).join('') || '<tr><td colspan="6" style="color:var(--muted);text-align:center">Sin descuadres</td></tr>';
+
+  document.querySelector('#desc-prod-tabla tbody').innerHTML =
+    res.productos.map(d => `<tr>
+      <td>${d.fecha}</td><td>${d.supervisor}</td><td>${d.producto}</td>
+      <td>${d.sistema}</td><td>${d.fisico}</td><td>${tipoBadge(d.estado)}</td>
+    </tr>`).join('') || '<tr><td colspan="6" style="color:var(--muted);text-align:center">Sin descuadres</td></tr>';
+}
+
+async function cargarHistorial() {
+  const hist = await get('/api/historial');
+  document.querySelector('#hist-tabla tbody').innerHTML =
+    hist.map(m => `<tr>
+      <td>${m.fecha}</td><td>${m.usuario}</td>
+      <td>${tipoBadge(m.tipo)}</td><td>${m.producto}</td><td>${m.cantidad}</td>
+    </tr>`).join('') || '<tr><td colspan="5" style="color:var(--muted);text-align:center">Sin registros</td></tr>';
+}
+
+// ─── USUARIOS ─────────────────────────────────────────────────
+async function cargarUsuarios() {
+  const users = await get('/api/usuarios');
+  document.querySelector('#usr-tabla tbody').innerHTML =
+    users.map(u => `<tr><td>${u.usuario}</td><td><span class="badge badge-venta">${u.rol}</span></td></tr>`).join('');
+}
+async function crearUsuario() {
+  const res = await api('/api/crear_usuario', {
+    usuario: document.getElementById('cu-usr').value,
+    contrasena: document.getElementById('cu-pwd').value,
+    rol: document.getElementById('cu-rol').value,
+  });
+  showAlert('cu-alert', res.ok ? 'success' : 'error', res.msg);
+  if (res.ok) cargarUsuarios();
+}
+async function editarUsuario() {
+  const res = await api('/api/editar_usuario', {
+    usuario: document.getElementById('eu-usr').value,
+    contrasena: document.getElementById('eu-pwd').value,
+    rol: document.getElementById('eu-rol').value,
+  });
+  showAlert('eu-alert', res.ok ? 'success' : 'error', res.msg);
+  if (res.ok) cargarUsuarios();
+}
+</script>
+</body>
+</html>
